@@ -29,6 +29,8 @@ func test() error {
 	}
 
 	req := common.MakeDefaultHTTPRequest(http.MethodGet, "v1/instancePrincipalRootCACertificates")
+	req.URL.Scheme = "https"
+	req.URL.Host = "auth.us-phoenix-1.oraclecloud.com"
 
 	signedHeaders := common.DefaultGenericHeaders()
 	signer := common.RequestSigner(provider, signedHeaders, common.DefaultBodyHeaders())
