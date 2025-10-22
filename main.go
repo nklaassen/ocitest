@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"time"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
@@ -35,6 +36,12 @@ func test() error {
 	signedHeaders := common.DefaultGenericHeaders()
 	signer := common.RequestSigner(provider, signedHeaders, common.DefaultBodyHeaders())
 	signer.Sign(&req)
+
+	dump, err := httputil.DumpRequestOut(&req, true)
+	if err != nil {
+		return fmt.Errorf("dumping request: %w", err)
+	}
+	fmt.Println(string(dump))
 
 	client := &http.Client{
 		Timeout: 5 * time.Second,
