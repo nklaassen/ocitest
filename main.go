@@ -29,15 +29,19 @@ func test() error {
 		return fmt.Errorf("making provider: %w", err)
 	}
 
-	req := common.MakeDefaultHTTPRequest(http.MethodGet, "v1/instancePrincipalRootCACertificates")
-	req.URL.Scheme = "https"
-	req.URL.Host = "auth.us-phoenix-1.oraclecloud.com"
+	url := "https://auth.us-phoenix-1.oraclecloud.com/v1/instancePrincipalRootCACertificates"
 
-	signedHeaders := common.DefaultGenericHeaders()
-	signer := common.RequestSigner(provider, signedHeaders, common.DefaultBodyHeaders())
-	signer.Sign(&req)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return fmt.Errorf("building request: %w", err)
+	}
 
-	dump, err := httputil.DumpRequestOut(&req, true)
+	req.Header.Set("Date", time.Now().UTC().Format(http.TimeFormat))
+
+	signer := common.DefaultRequestSigner(provider)
+	signer.Sign(req)
+
+	dump, err := httputil.DumpRequestOut(req, true)
 	if err != nil {
 		return fmt.Errorf("dumping request: %w", err)
 	}
@@ -46,7 +50,7 @@ func test() error {
 	client := &http.Client{
 		Timeout: 5 * time.Second,
 	}
-	resp, err := client.Do(&req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("sending request: %w", err)
 	}
